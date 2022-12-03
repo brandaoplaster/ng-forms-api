@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: 'postgres:13'
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: 'postgres'
+
+  website:
+    depends_on:
+      - postgres
+    build: .
+    command: bash start.sh
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/ng-forms-api
+    volumes_from:
+      - box
+
+  box:
+    image: busybox
+    volumes:
+      - /box
+
+  mailcatcher:
+    image: yappabe/mailcatcher
+    ports:
+      - 1025:1025
+      - 1080:1080
+
+volumes:
+  postgres:
+  box:
