@@ -9,6 +9,7 @@ gem "puma", "~> 3.11"
 gem "rack-cors"
 gem "rack-attack"
 gem "friendly_id", "~> 5.5"
+gem "devise_token_auth", "~> 1.1.4"
 
 gem "bootsnap", ">= 1.1.0", require: false
 
