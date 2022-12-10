@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Api::V1::Forms", type: :request do
   describe "GET /index" do
-    context "with invalid authencation headers" do
+    context "with invalid authentication headers" do
       it_behaves_like :deny_without_authorization, :get, "/api/v1/forms"
     end
 
@@ -12,7 +12,7 @@ RSpec.describe "Api::V1::Forms", type: :request do
         @form1 = create(:form, user: @user)
         @form2 = create(:form, user: @user)
 
-        get "api/v1/forms", params: {}, headers: header_with_authentication(@user)
+        get "/api/v1/forms", params: {}, headers: header_with_authentication(@user)
       end
 
       it "returns http success 200" do
@@ -31,9 +31,43 @@ RSpec.describe "Api::V1::Forms", type: :request do
   end
 
   describe "GET /show" do
-    it "returns http success" do
-      get "/api/v1/forms/show"
-      expect(response).to have_http_status(:success)
+    before do
+      @user = create(:user)
+    end
+
+    context "when form exists" do
+      context "and is enable" do
+        before do
+          @form = create(:form, user: @user, enable: true)
+        end
+
+        it "returns http success 200" do
+          expect_status(200)
+        end
+
+        it "returned form with right datas" do
+          get "/api/forms/#{@form.friendly_id}", params: {}, headers: header_with_authentication(@user)
+          expect(json).to eql(JSON.parse(@form.to_json))
+        end
+      end
+
+      context "and is unable" do
+        before do
+          @form = create(:form, user: @user, enable: false)
+        end
+
+        it "returns http not found 404" do
+          get "/api/v1/forms/#{FFaker::Lorem.word}", params: { id: @form.friendly_id }, headers: header_with_authentication(@user)
+          expect_status(404)
+        end
+      end
+    end
+
+    context "when form dont exists" do
+      it "returns http not found 404" do
+        get "/api/v1/forms/#{FFaker::Lorem.word}", params: {}, headers: header_with_authentication(@user)
+        expect_status(404)
+      end
     end
   end
 
