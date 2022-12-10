@@ -71,10 +71,64 @@ RSpec.describe "Api::V1::Forms", type: :request do
     end
   end
 
-  describe "GET /update" do
-    it "returns http success" do
-      get "/api/v1/forms/update"
-      expect(response).to have_http_status(:success)
+  describe "PUT /update" do
+    context "with invalid authentication headers" do
+      it_behaves_like :deny_without_authorization, :put, "/api/v1/forms/questionary"
+    end
+
+    context "with valid authentication headers" do
+      before do
+        @user = create(:user)
+      end
+
+      context "when form exists" do
+        context "and user is the owner" do
+          before do
+            @form = create(:form, user: @user)
+            @form_attributes = attributes_for(:form, id: @form.id)
+            put "/api/v1/forms/#{@form.friendly_id}", params: { form: @form_attributes }, headers: header_with_authentication(@user)
+          end
+
+          it "returns http success 200" do
+            expect_status(200)
+          end
+
+          it "form are updated with correct data" do
+            @form.reload
+            @form_attributes.each do |field|
+              expect(@form[field.first]).to eql(field.last)
+            end
+          end
+
+          it "form data is correct" do
+            @form_attributes.each do |field|
+              expect(json[field.first.to_s]).to eql(field.last)
+            end
+          end
+        end
+
+        context "and user is not the owner" do
+          before do
+            @form = create(:form)
+            @form_attributes = attributes_for(:form, id: @form.id)
+            put "/api/v1/forms/#{@form.friendly_id}", params: { form: @form_attributes }, headers: header_with_authentication(@user)
+          end
+
+          it "returns http not found 404" do
+            expect_status(404)
+          end
+        end
+      end
+
+      context "when form dont exists" do
+        before do
+          @form_attributes = attributes_for(:form)
+        end
+
+        it "return http not found 404" do
+          delete "/api/v1/forms/#{FFaker::Lorem.word}", params: { form: @form_attributes }, headers: header_with_authentication(@user)
+        end
+      end
     end
   end
 
