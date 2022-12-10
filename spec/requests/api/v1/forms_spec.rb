@@ -78,10 +78,49 @@ RSpec.describe "Api::V1::Forms", type: :request do
     end
   end
 
-  describe "GET /create" do
-    it "returns http success" do
-      get "/api/v1/forms/create"
-      expect(response).to have_http_status(:success)
+  describe "POST /create" do
+    context "with invalid authentication headers" do
+      it_behaves_like :deny_without_authorization, :post, "/api/v1/forms"
+    end
+
+    context "with valid authentication headers" do
+      before do
+        @user = create(:user)
+      end
+
+      context "and with valid params" do
+        before do
+          @form_atributes = attributes_for(:form)
+          post "/api/v1/forms", params: { form: @form_atributes }, headers: header_with_authentication(@user)
+        end
+
+        it "return http success 200" do
+          expect_status(200)
+        end
+
+        it "form are created with correct data" do
+          @form_atributes.each do |field|
+            expect(Form.first[field]).to eq(field)
+          end
+        end
+
+        it "returned data is correct" do
+          @form_atributes.each do |field|
+            expect(json[field.first.to_s]).to eq(field.last)
+          end
+        end
+      end
+
+      context "and with invalid params" do
+        before do
+          @other_user = create(:user)
+          post "/api/v1/forms", params: { form: {} }, headers: header_with_authentication(@user)
+        end
+
+        it "return http not found 404" do
+          expect_status(404)
+        end
+      end
     end
   end
 
