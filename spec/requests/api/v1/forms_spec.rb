@@ -178,10 +178,44 @@ RSpec.describe "Api::V1::Forms", type: :request do
     end
   end
 
-  describe "GET /destroy" do
-    it "returns http success" do
-      get "/api/v1/forms/destroy"
-      expect(response).to have_http_status(:success)
+  describe "DELETE /destroy" do
+    before do
+      @user = create(:user)
+    end
+
+    context "when form exists" do
+      context "and user is the owner" do
+        before do
+          @form = create(:form, user: @user)
+          delete "/api/v1/forms/#{FFaker::Lorem.word}", params: {}, headers: header_with_authentication(@user)
+        end
+
+        it "returns http success 200" do
+          expect_status(200)
+        end
+
+        it "form are deleted" do
+          expect(Form.all.count).to eql(0)
+        end
+      end
+
+      context "and user is not owner" do
+        before do
+          @form = create(:form)
+          delete "/api/v1/forms/#{FFaker::Lorem.word}", params: {}, headers: header_with_authentication(@user)
+        end
+
+        it "returns http forbidden 403" do
+          expect_status(403)
+        end
+      end
+    end
+
+    context "when form dont exists" do
+      it "returns http not found 404" do
+        delete "/api/v1/forms/#{FFaker::Lorem.word}", params: {}, headers: header_with_authentication(@user)
+        expect_status(404)
+      end
     end
   end
 end
