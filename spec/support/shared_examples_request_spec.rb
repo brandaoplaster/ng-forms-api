@@ -1,5 +1,5 @@
-shared_examples_for :deny_without_authentication do |method_type, action, params = {}|
-  it "return unauthrorized (401) request" do
+shared_examples_for :deny_without_authorization do |method_type, action, params = {}|
+  it "returns unauthrorized(401) request" do
     case method_type
     when :get
       get action,
