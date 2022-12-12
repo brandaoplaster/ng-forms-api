@@ -1,5 +1,5 @@
 module Api::V1
-  class FormsController < ApiController
+  class FormsController < Api::V1::ApiController
     def index
     end
 
