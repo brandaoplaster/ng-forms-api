@@ -1,6 +1,7 @@
 module Api::V1
   class FormsController < Api::V1::ApiController
     before_action :set_form, only: [:show, :update, :destroy]
+    before_action :allow_only_owner, only: [:update, :destroy]
 
     def index
       @forms = current_api_v1_user.forms
@@ -17,6 +18,8 @@ module Api::V1
     end
 
     def update
+      @form.update(form_params)
+      render json: @form
     end
 
     def destroy
@@ -26,6 +29,12 @@ module Api::V1
 
     def set_form
       @form = From.friendly.find(params[:id])
+    end
+
+    def allow_only_owner
+      unless current_api_v1_user == @form.user
+        render json: {}, status: :forbidden and return
+      end
     end
 
     def form_params
