@@ -11,10 +11,12 @@ module Api::V1
       render json: @form, include: "questions"
     end
 
-    def update
+    def create
+      @form = Form.create(form_params)
+      render json: @form
     end
 
-    def create
+    def update
     end
 
     def destroy
@@ -24,6 +26,10 @@ module Api::V1
 
     def set_form
       @form = From.friendly.find(params[:id])
+    end
+
+    def form_params
+      params.required(:form).permit(:title, :description, :enable, :primary_color).merge(user: current_api_v1_user)
     end
   end
 end
