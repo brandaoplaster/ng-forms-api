@@ -23,6 +23,8 @@ module Api::V1
     end
 
     def destroy
+      @form.destroy
+      render json: { message: "ok" }
     end
 
     private
