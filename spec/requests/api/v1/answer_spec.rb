@@ -121,4 +121,58 @@ RSpec.describe "Api::V1::Answers", type: :request do
       end
     end
   end
+
+  describe "DELETE /answers/:id" do
+    before do
+      @user = create(:user)
+      @form = create(:form, user: @user)
+    end
+
+    context "With Invalid authentication headers" do
+      it_behaves_like :deny_without_authorization, :delete, "/api/v1/answers/questionary"
+    end
+
+    context "With valid authentication headers" do
+      context "When answer exists" do
+        context "And user is the owner" do
+          before do
+            @answer = create(:answer, form: @form)
+            @questions_answers = create(:questions_answer, answer: @answer)
+
+            delete "/api/v1/answers/#{@answer.id}", params: {}, headers: header_with_authentication(@user)
+          end
+
+          it "returns 200" do
+            expect_status(200)
+          end
+
+          it "answer are deleted" do
+            expect(Answer.all.count).to eql(0)
+          end
+
+          it "associated questions answers are deleted" do
+            expect(QuestionsAnswer.all.count).to eql(0)
+          end
+        end
+
+        context "And user is not the owner" do
+          before do
+            @answer = create(:answer)
+            delete "/api/v1/answers/#{@answer.id}", params: {}, headers: header_with_authentication(@user)
+          end
+
+          it "returns 403" do
+            expect_status(403)
+          end
+        end
+      end
+
+      context "When answer dont exists" do
+        it "returns 404" do
+          delete "/api/v1/answers/#{FFaker::Lorem.word}", params: {}, headers: header_with_authentication(@user)
+          expect_status(404)
+        end
+      end
+    end
+  end
 end
