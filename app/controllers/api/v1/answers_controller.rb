@@ -1,8 +1,8 @@
 module Api::V1
   class AnswersController < Api::V1::ApiController
     before_action :set_form
-    before_action :set_answer, only: [:show]
-    before_action :allow_only_owner, only: [:index, :show]
+    before_action :set_answer, only: [:show, :destroy]
+    before_action :allow_only_owner, only: [:index, :show, :destroy]
 
     def index
       @answers = @form.answers
@@ -16,6 +16,11 @@ module Api::V1
     def create
       @answer = Answer.create_with_questions(@form, params["questions_answers"])
       render json: @answer
+    end
+
+    def destroy
+      @answer.destroy
+      render json: { message: "ok" }
     end
 
     private
