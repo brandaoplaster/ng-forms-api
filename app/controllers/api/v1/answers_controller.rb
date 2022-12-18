@@ -13,6 +13,11 @@ module Api::V1
       render json: @answer, include: "questions_answers"
     end
 
+    def create
+      @answer = Answer.create_with_questions(@form, params["questions_answers"])
+      render json: @answer
+    end
+
     private
 
     def set_answer
