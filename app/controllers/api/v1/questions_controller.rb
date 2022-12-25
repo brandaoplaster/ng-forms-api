@@ -4,10 +4,10 @@ module Api::V1
     before_action :allow_only_owner, only: [:create, :update, :destroy]
     before_action :set_question, only: [:update, :destroy]
 
-    def create
-      @question = Question.create(question_params.merge(form: @form))
-      render json: @question
-    end
+    # def create
+    #   @question = Question.create(question_params.merge(form: @form))
+    #   render json: @question
+    # end
 
     def update
       @question.update(question_params)
