@@ -9,10 +9,10 @@ module Api::V1
     #   render json: @question
     # end
 
-    def update
-      @question.update(question_params)
-      render json: @question
-    end
+    # def update
+    #   @question.update(question_params)
+    #   render json: @question
+    # end
 
     def destroy
       @question.destroy
